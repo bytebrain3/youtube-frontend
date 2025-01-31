@@ -40,7 +40,7 @@ export function YouTubeSidebar() {
       collapsible="icon" 
       className="border-r-0 bg-background"
     >
-      <SidebarHeader className="">
+      <SidebarHeader className="p-0">
       <TopNav/>
           
       </SidebarHeader>
