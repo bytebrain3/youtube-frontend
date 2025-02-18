@@ -49,36 +49,33 @@ export default function Home() {
     <SidebarProvider defaultOpen={false}>
       <YouTubeSidebar />
       <SidebarInset className="flex-grow">
-        <main>
+        <main className="min-h-screen">
           <Suspense fallback={null}>
             <MobileComponents />
           </Suspense>
           <div className="lg:pt-16">
-            <div className="flex flex-col h-screen">
-              <div className="flex-grow overflow-hidden">
-                <ScrollArea className="h-full pb-32 lg:pb-0 md:pb-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 space-y-3 gap-4 p-4 pt-4 lg:pt-2">
-                    {isLoading
-                      ? Array.from({ length: 10 }).map((_, i) => (
-                          <VideoSkeleton key={i} />
-                        ))
-                      : videos.map((video) => (
-                          <VideoCard
-                            key={video._id}
-                            videoId={video.videoId}
-                            thumbnail={video.thumbnailUrl}
-                            title={video.title}
-                            channel={video.channel_name}
-                            channelImage={video.channel_icon}
-                            views={video.views}
-                            uploadDate={video.createdAt}
-                            duration={video.duration}
-                          />
-                        ))}
-                  </div>
-                </ScrollArea>
+            <ScrollArea className="h-[100vh] lg:h-[calc(100vh-4rem)] pb-32 lg:pb-0 md:pb-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 p-4">
+                {isLoading
+                  ? Array.from({ length: 15 }).map((_, i) => (
+                      <VideoSkeleton key={i} />
+                    ))
+                  : videos.map((video) => (
+                      <VideoCard
+                        key={video._id}
+                        videoId={video.videoId}
+                        thumbnail={video.thumbnailUrl}
+                        title={video.title}
+                        channel={video.channel_name}
+                        channelImage={video.channel_icon}
+                        views={video.views}
+                        uploadDate={video.createdAt}
+                        duration={video.duration}
+                        username={video.channel_username}
+                      />
+                    ))}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         </main>
       </SidebarInset>

@@ -38,7 +38,7 @@ const formatRelativeTime = (dateString) => {
   if (minutes > 0) return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
   return "Just now";
 };
-
+import Link from "next/link";
 export function VideoCard({ video, index, setVideos }) {
   const [timeAgo, setTimeAgo] = useState("");
   const { data: session } = useSession();
@@ -78,6 +78,7 @@ export function VideoCard({ video, index, setVideos }) {
       <div className="relative group flex-1 overflow-hidden">
         <div className="flex gap-3 max-w-full">
           <div className="relative shrink-0">
+          <Link href={`/videos/${video.videoId}`}>
             <Image
               src={video.thumbnailUrl || "/1.png"}
               alt={video.title}
@@ -85,9 +86,11 @@ export function VideoCard({ video, index, setVideos }) {
               height={200}
               className="w-32 sm:w-40 h-24 object-cover rounded-lg"
             />
+            </Link>
             <div className="absolute bottom-1 right-1 bg-black/80 text-white px-1 rounded text-xs">
               {video.duration}
             </div>
+
           </div>
           <div className="flex-1 min-w-0 pr-2"> {/* Added min-w-0 for text truncation */}
             <h3 className="font-medium text-gray-900 dark:text-white line-clamp-2 text-sm sm:text-base">

@@ -22,6 +22,7 @@ export const authOptions = {
         const user = await User.findOneAndUpdate(
           { github_id: profile.id.toString() },
           {
+
             $setOnInsert: {
               _id: uuidv4(),
               full_name: profile.name || "",
@@ -33,6 +34,7 @@ export const authOptions = {
               last_synced: new Date(),
               username: profile.login,
             },
+
           },
           { upsert: true, new: true, setDefaultsOnInsert: true }
         );

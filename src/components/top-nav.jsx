@@ -30,20 +30,36 @@ import { TopNavSkeleton } from "@/components/skeleton/top-nav-skeleton";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+
 const SearchBar = () => {
-  //const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search/query/${encodeURIComponent(searchQuery.trim())}`);
+    }
+
+
+
+  };
 
   return (
-    <form className="flex items-center max-w-[732px] w-full">
+    <form onSubmit={handleSubmit} className="flex items-center max-w-[732px] w-full">
       <div className="flex w-full max-w-[632px]">
         <div className="flex w-full items-center rounded-l-full border px-4 hover:border-blue-600">
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="border-0 focus-visible:ring-0 placeholder:text-muted-foreground focus-visible:ring-offset-0 bg-sidebar"
           />
         </div>
+
         <Button
           type="submit"
           variant="secondary"
@@ -87,21 +103,19 @@ const NotificationBell = () => {
   );
 };
 
-
-
 export function UserMenu({ isChannel }) {
   const { data: session } = useSession();
-  
+
   const makeChannel = async () => {
     try {
       await axios.post("/api/switch-to-channel", {
         id: session?.user?.id,
       });
-      window.location.reload(); 
+      window.location.reload();
     } catch (error) {
       console.error("Error switching to channel:", error);
     }
-  }
+  };
 
   if (!session?.user) return null;
 
@@ -138,7 +152,7 @@ export function UserMenu({ isChannel }) {
           {isChannel ? (
             <DropdownMenuItem asChild>
               <Link
-                href="/profile"
+                href={`/channel/@${session.user?.username}`}
                 className="flex items-center gap-2 w-full cursor-pointer"
               >
                 <CircleUserRound className="h-5 w-5" />
@@ -147,10 +161,7 @@ export function UserMenu({ isChannel }) {
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem>
-              <Switch
-                onCheckedChange={makeChannel}
-                id="airplane-mode"
-              />
+              <Switch onCheckedChange={makeChannel} id="airplane-mode" />
               <Label htmlFor="airplane-mode">Switch to channel</Label>
             </DropdownMenuItem>
           )}
@@ -171,18 +182,21 @@ export default function TopNav() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Reset loading state when session changes
-    setIsLoading(true);
-    
-    if (!session?.user?.id) {
-      setIsLoading(false);
-      return;
-    }
-
     const checkChannelStatus = async () => {
+      if (status === 'loading') return;
+      
+      if (!session?.user?.id) {
+        setIsChannel(false);
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const res = await axios.post("/api/is-channel", { id: session.user.id });
-        setIsChannel(res.data.user.isChannel);
+        const res = await axios.post("/api/is-channel", {
+          id: session.user.id,
+        });
+        setIsChannel(res.data.isChannel);
+        localStorage.setItem("isChannel", res.data.isChannel);
       } catch (error) {
         console.error("Error checking channel status:", error);
       } finally {
@@ -191,10 +205,9 @@ export default function TopNav() {
     };
 
     checkChannelStatus();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, status]);
 
-  // Show skeleton while loading or checking authentication
-  if (status === "loading" || (status === "authenticated" && isLoading)) {
+  if (status === "loading" || isLoading) {
     return <TopNavSkeleton />;
   }
 
@@ -204,7 +217,7 @@ export default function TopNav() {
         <SidebarTrigger className="fixed left-4" />
         <YouTubeLogo className="ml-8" />
       </div>
-  
+
       <div className="flex flex-1 justify-center">
         <SearchBar />
       </div>
@@ -225,8 +238,6 @@ export default function TopNav() {
           </Button>
         )}
       </div>
-      
     </header>
-    
   );
 }

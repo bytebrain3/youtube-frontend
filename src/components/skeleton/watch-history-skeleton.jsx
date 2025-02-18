@@ -8,25 +8,7 @@ export function WatchHistorySkeleton() {
     <div className="min-h-screen bg-neutral-50 dark:bg-zinc-900 text-black dark:text-white">
       <div className="flex">
         <div className="flex-1 max-w-6xl mx-auto p-4">
-          <div className="flex justify-end gap-4 mb-6">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search watch history"
-                className="pl-10 bg-neutral-200 dark:bg-zinc-900 border-none text-black dark:text-white placeholder:text-gray-900 dark:placeholder:text-gray-400"
-                disabled
-              />
-            </div>
-            <Button variant="ghost" size="icon" disabled>
-              <Trash2 className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" disabled>
-              <Pause className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" disabled>
-              <Settings2 className="h-5 w-5" />
-            </Button>
-          </div>
+         
 
           <div className="space-y-3 pr-4">
             {[...Array(10)].map((_, index) => (

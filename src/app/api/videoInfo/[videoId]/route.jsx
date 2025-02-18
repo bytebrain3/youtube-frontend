@@ -10,7 +10,7 @@ export const revalidate = 0;
 export async function GET(request, context) {
   try {
     await connectDB();
-    const { videoId } = context.params;
+    const { videoId } = await context.params;
 
     const video = await Video.findById(videoId);
     if (!video) {

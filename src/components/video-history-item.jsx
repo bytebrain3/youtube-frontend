@@ -1,29 +1,25 @@
-import { memo } from "react";
 import Image from "next/image";
 import { X, Trash2, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { motion } from "motion/react";
-
-import { Slider } from "@/components/ui/slider";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { formatTimeAgo } from "@/lib/format-time";
 
-
-export const VideoHistoryItem = memo(function VideoHistoryItem({
-  video,
-  onRemove,
-}) {
+export function VideoHistoryItem({ video, onRemove }) {
   const { data: session } = useSession();
+
+  // Add helper function to convert time string to seconds
+  const timeToSeconds = (timeString) => {
+    const parts = timeString.split(":");
+    if (parts.length === 3) {
+      // HH:MM:SS
+      return +parts[0] * 3600 + +parts[1] * 60 + +parts[2];
+    }
+    if (parts.length === 2) {
+      // MM:SS
+      return +parts[0] * 60 + +parts[1];
+    }
+    return +timeString; // Already in seconds
+  };
 
   const removeWatchedVideo = async (videoId) => {
     try {
@@ -42,84 +38,57 @@ export const VideoHistoryItem = memo(function VideoHistoryItem({
     }
   };
 
+  const durationInSeconds = timeToSeconds(video.duration);
+  const watchedPercentage = (video.WatchedDuration / durationInSeconds) * 100;
+
+  console.log(`watched duration: ${watchedPercentage}%`);
+
   return (
-    <motion.div
-      whileHover={{
-        scale: 1.05,
-      }}
-      whileTap={{
-        scale : 1.05
-      }}
-      className="flex gap-4 group hover:bg-neutral-200 hover:dark:bg-neutral-800 p-2 px-4 rounded-lg transition-transform"
-    >
-      <div className="relative flex-shrink-0 w-40">
-        <div className="relative">
+    <div className="w-full group relative p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg">
+      <div className="flex gap-2 sm:gap-4">
+        <Link
+          href={`/videos/${video.videoId}`}
+          className="relative aspect-video w-32 sm:w-40 shrink-0"
+        >
           <Image
-            src={video.thumbnailUrl || "/placeholder.svg"}
+            src={video.thumbnailUrl}
             alt={video.title}
-            width={360}
-            height={200}
-            className="w-40 h-24 object-cover rounded"
+            fill
+            className="object-cover rounded-lg"
           />
-
-          <Slider
-            value={[video.WatchedDuration || 0]} // Ensuring it doesn't break
-            max={100}
-            step={1}
-            className="w-full h-1"
-          />
+          <div className="absolute bottom-1 right-1 bg-black/80 px-1 rounded text-white dark:text-white text-xs">
+            {video.duration}
+          </div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-200">
+            <div
+              className="h-full bg-red-600"
+              style={{
+                width: `${Math.min(watchedPercentage, 100)}%`,
+              }}
+            />
+          </div>
+        </Link>
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
+          <Link href={`/videos/${video.videoId}`}>
+            <h3 className="font-medium hover:text-blue-600 line-clamp-2">{video.title}</h3>
+          </Link>
+          <Link
+            href={`/channel/@${video.username}`}
+            className="text-sm text-gray-600 hover:text-blue-600 truncate"
+          >
+            {video.channel}
+          </Link>
+          <div className="text-sm text-gray-600 truncate">
+            {video.views} views • {formatTimeAgo(video.createdAt)}
+          </div>
         </div>
-        <div className="absolute bottom-6 right-1 bg-black/80 px-1 rounded text-xs text-white">
-          {video.duration}
-        </div>
+        <button
+          onClick={() => removeWatchedVideo(video.videoId)}
+          className="self-start p-1 sm:p-2 hover:bg-gray-200 rounded-full transition-colors shrink-0"
+        >
+          <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+        </button>
       </div>
-
-      <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-sm line-clamp-2">{video.title}</h3>
-        <div className="flex items-center gap-1 text-gray-400 text-sm mt-1">
-          <span>{video.channel_name}</span>
-          {video.verified && (
-            <CheckCircle className="h-3 w-3 fill-gray-400 stroke-none" />
-          )}
-        </div>
-        <p className="text-gray-400 text-sm">{video.views} views</p>
-        {video.description && (
-          <p className="text-gray-400 text-sm line-clamp-2 mt-1">
-            {video.description}
-          </p>
-        )}
-      </div>
-
-      <div className="flex items-center gap-1">
-        {" "}
-        {/* Ensuring alignment */}
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6">
-              <X size={18} />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your
-                video from your watch history and remove your data from our
-                servers.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => removeWatchedVideo(video.videoId)}
-              >
-                Delete <Trash2 className="ml-2 h-4 w-4" />
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </motion.div>
+    </div>
   );
-});
-
+}

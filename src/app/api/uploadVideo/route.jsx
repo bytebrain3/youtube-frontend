@@ -27,14 +27,18 @@ export async function POST(request) {
     }
 
     // Find the user
-    const user = await User.findById(userId);
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    const user = await User.findByIdAndUpdate(userId,{$inc:{totalVideo:1}})
+    if(!user){
+      return NextResponse.json({message:"User not found"},{status:404})
     }
+    
+
+
 
     // Channel info
     const channelName = user.full_name || "Unknown Channel";
     const channelIcon = user.profile_image_url || "/default-avatar.png";
+    
 
     // Video data object
     const videoData = new Video({
@@ -47,12 +51,12 @@ export async function POST(request) {
       userId: user._id.toString(),
       duration,
       channel_name: channelName,
+      channel_username: user.login,
       channel_icon: channelIcon,
     });
 
     // Save video to DB
     await videoData.save();
-
     return NextResponse.json(
       { message: "Video uploaded successfully" },
       { status: 200 }

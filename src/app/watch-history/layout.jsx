@@ -24,12 +24,12 @@ export default function VideoLayout({
   return (
     <SidebarProvider defaultOpen={false}>
       <YouTubeSidebar />
-      <SidebarInset className="flex-grow">
-        <main>
+      <SidebarInset className="flex-grow h-screen overflow-hidden">
+        <main className="relative h-full">
           <Suspense fallback={null}>
             <MobileComponents />
           </Suspense>
-          <div className='lg:pt-16'>{children}</div>
+          {children}
         </main>
       </SidebarInset>
     </SidebarProvider>

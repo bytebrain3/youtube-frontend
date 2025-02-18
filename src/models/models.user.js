@@ -16,11 +16,46 @@ const WatchedTimeSchema = new mongoose.Schema({
   },
 });
 
+const WatchLaterSchema = new mongoose.Schema({
+  videoId: {
+    type: String,
+    required: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  thumbnailUrl: {
+    type: String,
+    required: true
+  },
+  channel_name: {
+    type: String,
+    required: true
+  },
+  channel_username: {
+    type: String,
+    required: true
+  },
+  views: {
+    type: Number,
+    default: 0
+  },
+  duration: {
+    type: String,  // Changed from Number to String to handle time format "HH:MM:SS"
+    required: true
+  }
+}, { _id: false });
+
 const UserSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
       required: true,
+    },
+    description : {
+      type : String,
+      default : "",
     },
     full_name: {
       type: String,
@@ -50,11 +85,15 @@ const UserSchema = new mongoose.Schema(
     watchHistory: {
       type: [WatchedTimeSchema], // Updated to store objects
     },
+    watchLater: {
+      type: [WatchLaterSchema]
+    },
     github_id: {
       type: String,
       required: true,
       unique: true,
     },
+
     login: {
       type: String,
       required: true,
@@ -69,7 +108,9 @@ const UserSchema = new mongoose.Schema(
     },
     totalVideo: {
       type: Number,
+      default : 0,
     },
+
     description: {
       type: String,
     },
@@ -80,20 +121,39 @@ const UserSchema = new mongoose.Schema(
       type: String,
       require : true,
     },
-    Subscribers: {
+    Subscribers: [{
       type: String,
+      ref: 'User'
+    }],
+    SubscribedTo: [{
+      type: String,
+      ref: 'User'
+    }],
+    SubscricbersCount: {
+      type: Number,
       default: 0,
     },
     pausWatchedHistory : {
       type : Boolean,
       default : false
     },
+
+
+
     subscriberTo: {
-      type: String,
+      type: [String],
     },
   },
-  { timestamps: true } // Removed _id: false
+  { timestamps: true }
 );
+
+// Add a middleware to update SubscricbersCount before saving
+UserSchema.pre('save', function(next) {
+  if (this.isModified('Subscribers')) {
+    this.SubscricbersCount = this.Subscribers.length;
+  }
+  next();
+});
 
 // Check if model exists before compiling
 const User = mongoose.models.User || mongoose.model("User", UserSchema);

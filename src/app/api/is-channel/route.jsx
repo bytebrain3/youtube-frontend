@@ -22,7 +22,7 @@ export async function POST(request) {
             );
         }
         return NextResponse.json(
-            { user: user },
+            { isChannel : user.isChannel },
             { status: 200 }
         );
     } catch (error) {

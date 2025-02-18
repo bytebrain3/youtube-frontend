@@ -51,6 +51,10 @@ const VideoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    channel_username: {
+      type: String,
+      required: true,
+    },
     channel_icon: {
       type: String,
       required: true,

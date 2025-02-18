@@ -1,5 +1,15 @@
 export function formatTimeAgo(date) {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
+    if (!date) return "Invalid date";
+    
+    // Convert date string to Date object if needed
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // Validate date object
+    if (!(dateObj instanceof Date) || isNaN(dateObj)) {
+        return "Invalid date";
+    }
+
+    const seconds = Math.floor((new Date().getTime() - dateObj.getTime()) / 1000)
     const minutes = Math.floor(seconds / 60)
     const hours = Math.floor(minutes / 60)
     const days = Math.floor(hours / 24)
@@ -12,8 +22,8 @@ export function formatTimeAgo(date) {
     if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`
     if (minutes > 0) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`
     return `${seconds} second${seconds === 1 ? "" : "s"} ago`
-  }
-  
+}
+
   export function formatDuration(seconds) {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)

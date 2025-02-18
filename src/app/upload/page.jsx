@@ -45,6 +45,28 @@ export default function UploadVideo() {
       console.log("Socket not connected")
     }
   }, [socket])
+  useEffect(() => {
+    // Load saved data from localStorage on component mount
+    const savedData = localStorage.getItem('uploadFormData');
+    if (savedData) {
+      const { title: savedTitle, description: savedDescription, thumbnailUrl: savedThumbnailUrl } = JSON.parse(savedData);
+      setTitle(savedTitle || '');
+      setDescription(savedDescription || '');
+      setThumbnailUrl(savedThumbnailUrl || null);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save form data to localStorage whenever fields change
+    const formData = {
+      title,
+      description,
+      thumbnailUrl
+    };
+    localStorage.setItem('uploadFormData', JSON.stringify(formData));
+  }, [title, description, thumbnailUrl]);
+
+
 
   const onVideoDrop = useCallback(
     async (acceptedFiles) => {

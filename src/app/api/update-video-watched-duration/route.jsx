@@ -1,27 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import User from "../../../models/models.user";
 import connectDB from "../../../lib/db";
-import { Cache } from 'memory-cache';
-
-
-// Create a cache instance with proper typing
-const userCache = new Cache();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+import { cacheUtils, CACHE_DURATION } from "@/lib/cache";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 100; // milliseconds
 
 async function getUser(id) {
   // Check cache first
-  const cachedUser = userCache.get(id);
+  const cachedUser = cacheUtils.get(id);
   if (cachedUser) {
     return cachedUser;
+    
   }
 
   // If not in cache, fetch from DB
   const user = await User.findById({ _id : id });
   if (user) {
-    userCache.put(id, user, CACHE_DURATION);
+    cacheUtils.set(id, user, CACHE_DURATION);
+    
   }
   return user;
 }
@@ -52,7 +49,7 @@ async function updateUserWithRetry(user , videoId, durationNumber, userid) {
       await user.save();
 
       // Update cache after successful save
-      userCache.put(userid, user, CACHE_DURATION);
+      cacheUtils.set(userid, user, CACHE_DURATION);
       return true;
     } catch (error) {
       if (error.message.includes('version') && attempt < MAX_RETRIES - 1) {

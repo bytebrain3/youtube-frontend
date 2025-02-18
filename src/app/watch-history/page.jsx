@@ -21,12 +21,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { WatchHistorySkeleton } from "@/components/skeleton/watch-history-skeleton";
 
-
 export default function WatchHistoryPage() {
   const { data: session, status } = useSession();
   const [historyItems, setHistoryItems] = useState([]);
   const [isPausedWatchHistory, setIsPausedWatchHistory] = useState(false);
-  const [loading, setLoading] = useState(true); // Initialize as true
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Update loading state based on session status
@@ -96,36 +95,49 @@ export default function WatchHistoryPage() {
   if (loading) {
     return <WatchHistorySkeleton />;
   }
+
   if (!session) {
     return (
-      <div className="w-screen h-screen flex flex-col items-center justify-center">
+      <div className="w-full h-full flex flex-col items-center justify-center">
         Please log in to view your watch history.
       </div>
     );
   }
 
   return (
-    <div className="w-screen min-h-screen">
-      <div className="flex">
-        <div className="flex-1 max-w-7xl mx-auto p-4">
-          <div className="flex justify-end gap-4 mb-6 ">
-            <div className="relative flex-1 max-w-md">
+    <div className="w-full h-full bg-white dark:bg-black">
+      <div className="flex h-full">
+        <div className="flex-1 w-full">
+          {/* Mobile Search Header */}
+          <div className="flex items-center gap-4 p-2 sticky top-0 bg-white dark:bg-black z-10 border-b dark:border-zinc-800">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search watch history"
-                className="pl-10 bg-neutral-200 dark:bg-zinc-900 border-none text-black dark:text-white placeholder:text-gray-900 dark:placeholder:text-gray-400"
+                className="pl-10 bg-neutral-100 dark:bg-zinc-900 border-none text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 h-10 rounded-full"
               />
             </div>
-
+            
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-neutral-600 dark:text-neutral-400"
+              >
+                <Settings2 className="h-5 w-5" />
+                <span className="sr-only">Manage all history</span>
+              </Button>
+            </div>
+            <div className="flex flex-row gap-2 ">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-neutral-400 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-100"
+                  className="rounded-lg shadow-lg"
                 >
+
                   <Trash2 size={18} />
-                  <span className="sr-only">Clear all watch history</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -149,37 +161,37 @@ export default function WatchHistoryPage() {
               variant="ghost"
               size="icon"
               onClick={pauseWatchHistory}
-              className="text-neutral-400 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-100"
+              className="rounded-lg shadow-lg"
+
             >
               {isPausedWatchHistory ? (
                 <Play className="h-5 w-5" />
               ) : (
                 <Pause className="h-5 w-5" />
               )}
-              <span className="sr-only">Pause watch history</span>
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-neutral-400 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-100"
-            >
-              <Settings2 className="h-5 w-5" />
-              <span className="sr-only">Manage all history</span>
             </Button>
           </div>
+          </div>
 
-          <ScrollArea className="h-[calc(100vh-10px)] lg:h-[calc(100vh-150px)]  pb-4 bg-red-50">
-            <div className="space-y-3 py-4 px-24">
-              {historyItems.map((item) => (
-                <VideoHistoryItem
-                  key={item.videoId}
-                  video={item}
-                  onRemove={removeHistoryItem}
-                />
-              ))}
+          {/* Video List */}
+          <ScrollArea className="h-[calc(100vh-56px)] pb-16">
+            <div className="space-y-3 py-2 px-2 sm:px-4 lg:px-24">
+              {!historyItems || historyItems.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">
+                  No videos in watch history
+                </div>
+              ) : (
+                Array.isArray(historyItems) && historyItems.map((item) => (
+                  <VideoHistoryItem
+                    key={item.videoId}
+                    video={item}
+                    onRemove={removeHistoryItem}
+                  />
+                ))
+              )}
             </div>
           </ScrollArea>
+
         </div>
       </div>
     </div>
